@@ -5,4 +5,4 @@ export const GITHUB_SERVER_URL =
   process.env.GITHUB_SERVER_URL || "https://github.com" ||
   process.env.GITEA_SERVER_URL;
 
-  export const USE_REST_API = process.env.USE_REST_API === "true";
+export const USE_GITEA_API = process.env.USE_GITEA_API === "true";
