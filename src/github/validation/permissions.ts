@@ -59,7 +59,7 @@ export async function checkWritePermissions(
     const permissionLevel = response.data.permission;
     core.info(`Permission level retrieved: ${permissionLevel}`);
 
-    if (permissionLevel === "admin" || permissionLevel === "write") {
+    if (permissionLevel === "owner" || permissionLevel === "admin" || permissionLevel === "write") {
       core.info(`Actor has write access: ${permissionLevel}`);
       return true;
     } else {

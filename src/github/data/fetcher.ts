@@ -1,6 +1,12 @@
 import { execFileSync } from "child_process";
 import type { Octokits } from "../api/client";
+import { USE_GITEA_API } from "../api/config";
 import { ISSUE_QUERY, PR_QUERY, USER_QUERY } from "../api/queries/github";
+import {
+  fetchPullRequest,
+  fetchIssue,
+  fetchUser,
+} from "../api/queries/gitea";
 import {
   isIssueCommentEvent,
   isPullRequestReviewEvent,
@@ -183,14 +189,21 @@ export async function fetchGitHubData({
   try {
     if (isPR) {
       // Fetch PR data with all comments and file information
-      const prResult = await octokits.graphql<PullRequestQueryResponse>(
-        PR_QUERY,
-        {
-          owner,
-          repo,
-          number: parseInt(prNumber),
-        },
-      );
+      const prResult = USE_GITEA_API
+        ? await fetchPullRequest(
+            octokits.rest,
+            owner,
+            repo,
+            parseInt(prNumber),
+          )
+        : await octokits.graphql<PullRequestQueryResponse>(
+            PR_QUERY,
+            {
+              owner,
+              repo,
+              number: parseInt(prNumber),
+            },
+          );
 
       if (prResult.repository.pullRequest) {
         const pullRequest = prResult.repository.pullRequest;
@@ -200,7 +213,9 @@ export async function fetchGitHubData({
           pullRequest.comments?.nodes || [],
           triggerTime,
         );
-        reviewData = pullRequest.reviews || [];
+        reviewData = USE_GITEA_API
+        ? (pullRequest.reviews || null)
+        : (pullRequest.reviews || { nodes: [] });
 
         console.log(`Successfully fetched PR #${prNumber} data`);
       } else {
@@ -208,14 +223,21 @@ export async function fetchGitHubData({
       }
     } else {
       // Fetch issue data
-      const issueResult = await octokits.graphql<IssueQueryResponse>(
-        ISSUE_QUERY,
-        {
-          owner,
-          repo,
-          number: parseInt(prNumber),
-        },
-      );
+      const issueResult = USE_GITEA_API
+        ? await fetchIssue(
+            octokits.rest,
+            owner,
+            repo,
+            parseInt(prNumber),
+          )
+        : await octokits.graphql<IssueQueryResponse>(
+            ISSUE_QUERY,
+            {
+              owner,
+              repo,
+              number: parseInt(prNumber),
+            },
+          );
 
       if (issueResult.repository.issue) {
         contextData = issueResult.repository.issue;
@@ -223,7 +245,7 @@ export async function fetchGitHubData({
           contextData?.comments?.nodes || [],
           triggerTime,
         );
-
+        
         console.log(`Successfully fetched issue #${prNumber} data`);
       } else {
         throw new Error(`Issue #${prNumber} not found`);
@@ -376,9 +398,11 @@ export async function fetchUserDisplayName(
   login: string,
 ): Promise<string | null> {
   try {
-    const result = await octokits.graphql<UserQueryResponse>(USER_QUERY, {
-      login,
-    });
+    const result = USE_GITEA_API
+      ? await fetchUser(octokits.rest, login)
+      : await octokits.graphql<UserQueryResponse>(USER_QUERY, {
+          login,
+        });
     return result.user.name;
   } catch (error) {
     console.warn(`Failed to fetch user display name for ${login}:`, error);

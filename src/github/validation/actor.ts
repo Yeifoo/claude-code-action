@@ -12,6 +12,16 @@ export async function checkHumanActor(
   octokit: Octokit,
   githubContext: ParsedGitHubContext,
 ) {
+
+  if (process.env.OVERRIDE_BOT_USERNAMES){
+    if (process.env.OVERRIDE_BOT_USERNAMES.split(",").includes(githubContext.actor)){
+      throw new Error(
+      `Workflow initiated by non-human actor: ${githubContext.actor}. Please add bot to OVERRIDE_BOT_USERNAMES`,
+    );
+    }
+    return;
+  }
+
   // Fetch user information from GitHub API
   const { data: userData } = await octokit.users.getByUsername({
     username: githubContext.actor,

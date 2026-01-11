@@ -71,6 +71,11 @@ server.tool(
         repo: REPO_NAME!,
         head_sha: headSha,
         ...(status && { status }),
+      }).catch((error: Error) => {
+        // Gitea Actions API might not be fully compatible
+        throw new Error(
+          `Failed to fetch workflow runs. This may indicate Gitea Actions API incompatibility: ${error.message}`,
+        );
       });
 
       // Process runs to create summary
@@ -152,6 +157,11 @@ server.tool(
         owner: REPO_OWNER!,
         repo: REPO_NAME!,
         run_id,
+      })
+      .catch((error: Error) => {
+        throw new Error(
+          `Failed to fetch workflow run details. Gitea Actions API may not be fully compatible: ${error.message}`,
+        );
       });
 
       const processedJobs = jobsData.jobs.map((job: any) => {
@@ -219,6 +229,11 @@ server.tool(
         owner: REPO_OWNER!,
         repo: REPO_NAME!,
         job_id,
+      })
+      .catch((error: Error) => {
+        throw new Error(
+          `Failed to download job logs. Gitea Actions API may not be fully compatible: ${error.message}`,
+        );
       });
 
       const logsText = response.data as unknown as string;
