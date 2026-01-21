@@ -16,6 +16,27 @@ A general-purpose [Claude Code](https://claude.ai/code) action for GitHub PRs an
 - 📊 **Structured Outputs**: Get validated JSON results that automatically become GitHub Action outputs for complex automations
 - 🏃 **Runs on Your Infrastructure**: The action executes entirely on your own GitHub runner (Anthropic API calls go to your chosen provider)
 - ⚙️ **Simplified Configuration**: Unified `prompt` and `claude_args` inputs provide clean, powerful configuration aligned with Claude Code SDK
+- 🦊 **Gitea Support**: Full compatibility with Gitea through REST API fallback when GraphQL is unavailable 
+
+## 🦊 Gitea Support
+
+This action now supports Gitea through REST API fallback . Key features:
+
+- **Automatic REST API Fallback**: When `USE_REST_API=true` is set, the action uses REST API instead of GraphQL
+- **Full Feature Parity**: All PR/issue operations work identically on Gitea
+- **Environment Variables**: Configure Gitea endpoints via `GITEA_API_URL` and `GITEA_SERVER_URL`
+- **Permission Handling**: Supports Gitea's "owner" permission level in addition to GitHub's admin/write
+- **Bot Detection**: Use `GITEA_BOT_USERNAMES` to whitelist Gitea bot accounts
+- **Branch URL Compatibility**: Automatically uses Gitea's `/src/branch/` path instead of GitHub's `/tree/`
+
+**Configuration Example for Gitea:**
+```yaml
+env:
+  USE_REST_API: "true"
+  GITEA_API_URL: "https://gitea.example.com/api/v1"
+  GITEA_SERVER_URL: "https://gitea.example.com"
+  GITEA_BOT_USERNAMES: "gitea-actions[bot],renovate[bot]"
+```
 
 ## 📦 Upgrading from v0.x?
 
