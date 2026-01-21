@@ -13,10 +13,10 @@ export async function checkHumanActor(
   githubContext: ParsedGitHubContext,
 ) {
 
-  if (process.env.OVERRIDE_BOT_USERNAMES){
-    if (process.env.OVERRIDE_BOT_USERNAMES.split(",").includes(githubContext.actor)){
+  if (process.env.GITEA_BOT_USERNAMES){
+    if (process.env.GITEA_BOT_USERNAMES.split(",").includes(githubContext.actor)){
       throw new Error(
-      `Workflow initiated by non-human actor: ${githubContext.actor}. Please add bot to OVERRIDE_BOT_USERNAMES`,
+      `Workflow initiated by non-human actor: ${githubContext.actor}. Please add bot to GITEA_BOT_USERNAMES`,
     );
     }
     return;
